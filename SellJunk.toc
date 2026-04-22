@@ -1,30 +1,18 @@
-## Interface: 120000, 50503, 40401, 30403, 20505, 11508
-## Title: SellJunk
+## Interface: 120005, 110105
+## Title: SellJunk |cff00aa00TWW v3.0.36|r
 ## Notes: Sells all junk in your inventory at once.
 ## Notes-zhTW: 一次販售掉你背包內的垃圾物品。
 ## Notes-zhCN: 一次贩卖掉你背包内的垃圾物品。
-## Category: Inventory
-## Category-deDE: Inventar
-## Category-esES: Inventario
-## Category-esMX: Inventario
-## Category-frFR: Inventaire
-## Category-itIT: Inventario
-## Category-koKR: 소지품
-## Category-ptBR: Inventário
-## Category-ruRU: Инвентарь
-## Category-zhCN: 物品栏
-## Category-zhTW: 物品欄
-## Author: CrazyBenny of Stormrage-EU / datagutten
-## X-URL: https://github.com/Beast-Masters-addons/SellJunk
-## LastUpdate: @project-date-iso@
-## Version: @project-version@
+## Author: CrazyBenny of Stormrage-EU, FanUpdate by ImJayc2, TravisSpomer and Shyde
+## X-Email: cbenneh AT gmail DOT com
+## LastUpdate: 25.04.2025
+## Version: 3.0.36 TWW FanUpdate by Shyde
+## IconTexture: Interface\Icons\Inv_misc_coin_01
 
 ## X-Credits: Xonpathos for previous version of SellJunk
+## X-Category: Inventory
 
 ## SavedVariables: SellJunkDB
-## X-Curse-Project-ID: 1458545
-## X-WoWI-ID: 26443
-## X-Wago-ID: anKWWqKE
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
