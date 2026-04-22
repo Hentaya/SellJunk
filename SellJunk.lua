@@ -9,7 +9,7 @@ local addonName, addonTable = ...
 local L = addonTable.L
 local _
 
-addon.optionsFrame = {}
+addon.optionsFrame, addon.optionsCategoryID = AceConfigDialog:AddToBlizOptions("SellJunk", nil, nil, "general")
 local options = nil
 
 addon.sellButton = CreateFrame("Button", nil, MerchantFrame, "UIPanelButtonTemplate")
@@ -334,10 +334,11 @@ function addon:HandleSlashCommands(input)
       self:Rem(arg2, true)
     end
   else
-    -- function InterfaceOptionsFrame_OpenToCategory deprecated
-    -- InterfaceOptionsFrame_OpenToCategory(addon.optionsFrame)
-
-    Settings.OpenToCategory("SellJunk")
+    if Settings and addon.optionsCategoryID then
+		Settings.OpenToCategory(addon.optionsCategoryID)
+	else
+		InterfaceOptionsFrame_OpenToCategory(addon.optionsFrame)
+	end
   end
 end
 
