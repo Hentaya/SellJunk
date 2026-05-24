@@ -9,7 +9,6 @@ local addonName, addonTable = ...
 local L = addonTable.L
 local _
 
-addon.optionsFrame, addon.optionsCategoryID = AceConfigDialog:AddToBlizOptions("SellJunk", nil, nil, "general")
 local options = nil
 
 addon.sellButton = CreateFrame("Button", nil, MerchantFrame, "UIPanelButtonTemplate")
@@ -30,12 +29,59 @@ local string_find = string.find
 local pairs = pairs
 local wipe = wipe
 local DeleteCursorItem = DeleteCursorItem
-local GetContainerItemInfo = GetContainerItemInfo
-local GetItemInfo = GetItemInfo
-local PickupContainerItem = (C_Container.PickupContainerItem or PickupContainerItem)
-local PickupMerchantItem = (C_Container.PickupMerchantItem or PickupMerchantItem)
-local GetContainerNumSlots = (C_Container.GetContainerNumSlots or GetContainerNumSlots)
-local GetContainerItemLink = (C_Container.GetContainerItemLink or GetContainerItemLink)
+local PickupContainerItemLegacy = PickupContainerItem
+local PickupMerchantItem = PickupMerchantItem
+
+local function GetContainerNumSlotsCompat(bag)
+  if C_Container and C_Container.GetContainerNumSlots then
+    return C_Container.GetContainerNumSlots(bag)
+  end
+
+  if GetContainerNumSlots then
+    return GetContainerNumSlots(bag)
+  end
+
+  return 0
+end
+
+local function GetContainerItemLinkCompat(bag, slot)
+  if C_Container and C_Container.GetContainerItemLink then
+    return C_Container.GetContainerItemLink(bag, slot)
+  end
+
+  if GetContainerItemLink then
+    return GetContainerItemLink(bag, slot)
+  end
+
+  return nil
+end
+
+local function GetContainerItemStackCountCompat(bag, slot)
+  if C_Container and C_Container.GetContainerItemInfo then
+    local itemInfo = C_Container.GetContainerItemInfo(bag, slot)
+    if itemInfo and itemInfo.stackCount then
+      return itemInfo.stackCount
+    end
+
+    return 0
+  end
+
+  if GetContainerItemInfo then
+    return select(2, GetContainerItemInfo(bag, slot)) or 0
+  end
+
+  return 0
+end
+
+local function PickupContainerItemCompat(bag, slot)
+  if C_Container and C_Container.PickupContainerItem then
+    return C_Container.PickupContainerItem(bag, slot)
+  end
+
+  if PickupContainerItemLegacy then
+    return PickupContainerItemLegacy(bag, slot)
+  end
+end
 
 
 function addon:OnInitialize()
@@ -58,7 +104,9 @@ function addon:OnInitialize()
 
   self:PopulateOptions()
   AceConfigRegistry:RegisterOptionsTable("SellJunk", options)
-  addon.optionsFrame = AceConfigDialog:AddToBlizOptions("SellJunk", nil, nil, "general")
+  if not addon.optionsFrame and not addon.optionsCategoryID then
+	addon.optionsFrame, addon.optionsCategoryID = AceConfigDialog:AddToBlizOptions("SellJunk", nil, nil, "general")
+  end
 end
 
 function addon:OnEnable()
@@ -88,15 +136,15 @@ function addon:Sell()
   local max12 = addon.db.char.max12
 
   for bag = 0,5 do
-    for slot = 1,GetContainerNumSlots(bag) do
-      local item = GetContainerItemLink(bag,slot)
+    for slot = 1,GetContainerNumSlotsCompat(bag) do
+      local item = GetContainerItemLinkCompat(bag,slot)
 
       if self:CheckItemIsJunk(item,bag,slot) then
-        currPrice = (select(11, GetItemInfo(item)) or 0) * (GetContainerItemInfo and select(2, GetContainerItemInfo(bag, slot)) or C_Container.GetContainerItemInfo(bag, slot).stackCount)
-        -- this should get rid of problems with grey items, that cant be sell to a vendor
+        currPrice = (select(11, GetItemInfo(item)) or 0) * GetContainerItemStackCountCompat(bag, slot)
+		-- this should get rid of problems with grey items, that cant be sell to a vendor
         if currPrice > 0 then
           addon:AddProfit(currPrice)
-          PickupContainerItem(bag, slot)
+          PickupContainerItemCompat(bag, slot)
           PickupMerchantItem()
           if showSpam then
             self:Print(L["Sold"]..": "..item)
@@ -131,11 +179,11 @@ function addon:Destroy(count)
   local showSpam = addon.db.char.showSpam
 
   for bag = 0,5 do
-    for slot = 1,GetContainerNumSlots(bag) do
-      local item = GetContainerItemLink(bag,slot)
+    for slot = 1,GetContainerNumSlotsCompat(bag) do
+      local item = GetContainerItemLinkCompat(bag,slot)
 
       if self:CheckItemIsJunk(item,bag,slot) then
-        PickupContainerItem(bag, slot)
+        PickupContainerItemCompat(bag, slot)
         DeleteCursorItem()
         if showSpam then
           self:Print(L["Destroyed"]..": "..item)
